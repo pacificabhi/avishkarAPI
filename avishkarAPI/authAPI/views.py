@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.models import Token
 from .validations import *
 from .models import UserDetails
+from events.models import EventTeam,Event
 
 from django.views.decorators.csrf import csrf_exempt
 
@@ -182,5 +183,62 @@ class UpdateFeesStatus(APIView):
         return Response(context)
 
         
+
+
+class GetUserDetails(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        content = {'message': 'Hello, World!'}
+        return Response(content)
+
+    def post(self, request):
+
+        context = {"success": True}
+        errors = []
+
+        u = request.user
+        ud = request.user.userdetails
+        
+        context["userName"] = u.username
+        context["email"] = u.email
+        context["email"] = u.email
+        context["firstName"] = u.first_name
+        context["lastName"] = u.last_name
+        context["confirmed"] = ud.confirmed
+        context["feesPaid"] = ud.fees_paid
+        context["whatsapp"] = ud.whatsapp
+        context["phone"] = ud.phone
+        context["college"] = ud.college
+        context["msteamsID"] = ud.msteams_id
+        context["teams"] = {}
+
+
+
+        for x in EventTeam.objects.all():
+            if u in x.team_members.all():
+                context["teams"][x.team_id] = {
+                    "teamID":x.team_id,
+                    "teamAdmin":x.team_admin.username,
+                    "teamName":x.team_name,
+                    "teamMembers":[],
+                    "pendingMembers":[],
+                    "registeredEvents":{},
+                }
+                for y in x.pending_members.all():
+                    context["teams"][x.team_id]["pendingMembers"].append(y.username)
+                for y in x.team_members.all():
+                    context["teams"][x.team_id]["teamMembers"].append(y.username)
+
+                for y in Event.objects.all():
+                    if x in y.registered_teams.all():
+                        context["teams"][x.team_id]["registeredEvents"][y.event_id] = {
+                            "eventName":y.event_name
+                        }
+
+
+
+
+        return Response(context)
 
 
