@@ -37,6 +37,7 @@ class RegisterUser(APIView):
         email = request.POST.get("email").strip().lower()
         username = request.POST.get("username").strip().lower()
         password = request.POST.get("password")
+        is_mnnit = request.POST.get("ismnnit")
 
         if not validate_username(username):
             errors.append("Invalid Username")
@@ -61,6 +62,10 @@ class RegisterUser(APIView):
         u.save()
 
         ud = UserDetails.objects.create(user = u)
+        if is_mnnit == "true":
+            ud.college = "MNNIT"
+            ud.fees_paid = True
+            ud.save()
 
         token = Token.objects.get_or_create(user=u)
         context["token"] = token[0].key
