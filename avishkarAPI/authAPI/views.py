@@ -152,6 +152,32 @@ class UpdateUserDetails(APIView):
         return Response(context)
 
 
+
+class UpdateFeesStatus(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        content = {'message': 'Hello, World!'}
+        return Response(content)
+
+    def post(self, request):
+
+        context = {"success": False}
+
+        status = request.POST.get("status").strip()
+        ud = request.user.userdetails
+        
+        if status == "paid":
+            ud.fees_paid = True
+            context["message"] = "Fees paid successfully"
+        elif status == "pending":
+            ud.fees_paid = False
+        
+        ud.save()
+        context["success"] = True
+
+        return Response(context)
+
         
 
 
