@@ -12,7 +12,7 @@ class UserDetails(models.Model):
 
 	whatsapp = models.CharField(max_length=10, blank=True, null=False, default="")
 	phone = models.CharField(max_length=10, blank=True, null=False, default="")
-	college = models.TextField(max_length=255, blank=True, null=False, default="MNNIT")
+	college = models.TextField(max_length=255, blank=True, null=False, default="")
 	msteams_id = models.CharField(max_length=200, blank=True, null = False, default="")
 	
 
