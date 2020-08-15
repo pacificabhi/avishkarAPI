@@ -134,6 +134,9 @@ class UpdateUserDetails(APIView):
         if not is_valid_number(whatsapp):
             errors.append("Invalid WhatsApp Number")
 
+        if college == "MNNIT":
+            errors.append("College name MNNIT is not allowed")
+
         if errors:
             context["errors"]=errors
             return Response(context)
