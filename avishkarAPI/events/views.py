@@ -57,6 +57,10 @@ class AddTeamMember(APIView):
             context = {"success": False, "errors" : ["You are not admin of team {}".format(team_id)]}
             return Response(context)
 
+        if len(team.participants.all()) > 0:
+            context = {"success": False, "errors" : ["Team {} is already registerd in some event so it can not be edit".format(team_id)]}
+            return Response(context)
+
         member_username = request.POST.get("memberusername").strip()
         member = User.objects.filter(username=member_username).first()
 
@@ -111,6 +115,9 @@ class RemoveTeamMember(APIView):
             context = {"success": False, "errors" : ["Team with team id {} is not found".format(team_id)]}
             return Response(context)
 
+        if len(team.participants.all()) > 0:
+            context = {"success": False, "errors" : ["Team {} is already registerd in some event so it can not be edit".format(team_id)]}
+            return Response(context)
         
         member_username = request.POST.get("memberusername").strip()
         member = User.objects.filter(username=member_username).first()
@@ -176,11 +183,85 @@ class JoinRequestDecision(APIView):
                 context = {"success": True, "errors" : ["{} is successfully added to team {}".format(member_username, team_id)]}
             else:
                 context = {"success": True, "errors" : ["{} has declined to join team {}".format(member_username, team_id)]}
-                
+
             return Response(context)
 
         context = {"success": False, "errors" : ["No Join Request"]}
         return Response(context)
         
+
+
+class RegisterToEvent(APIView):
+
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        content = {'message': 'Hello, World!'}
+        return Response(content)
+
+
+    def post(self, request):
+        team_id = request.POST.get("teamid").strip()
+        event_id = request.POST.get("eventid").strip()
+
+        event = Event.objects.filter(event_id=event_id).first()
+
+        if not event:
+            context = {"success": False, "errors" : ["Event with event id {} is not found".format(event_id)]}
+            return Response(context)
+
+        if not event.can_register():
+            context = {"success": False, "errors" : ["Registration for this contest is closed"]}
+            return Response(context)
+
+        team = EventTeam.objects.filter(team_id=team_id).first()
+        if not team:
+            context = {"success": False, "errors" : ["Team with team id {} is not found".format(team_id)]}
+            return Response(context)
+
+        if request.user != team.team_admin:
+            context = {"success": False, "errors" : ["Only admin can register team to contest"]}
+            return Response(context)
+
+        if not team.is_ready():
+            context = {"success": False, "errors" : ["Team is not ready to register, Team has some pending members request(s)"]}
+            return Response(context)
+
+
+        if team.get_teamsize() > event.get_teamsize():
+            context = {"success": False, "errors" : ["Team has more number of members than event maximum team size"]}
+            return Response(context)
+
+
+        registered_teams = event.registered_teams.all()
+
+        if team in registered_teams:
+            context = {"success": False, "errors" : ["Team is already registered to this event"]}
+            return Response(context)
+
+        team_members = team.team_members.all()
+
+        already_members = []
+        for in_team in registered_teams:
+            for member in team_members:
+                if member in in_team.team_members.all():
+                    already_members.append((member, in_team))
+
+        if already_members:
+            errors = ["Some members of team is already in other team in the same event."]
+            for member, in_team in already_members:
+                errors.append("{} is member of {}".format(member.username, in_team.team_id))
+            
+            context = {"success": False, "errors" : errors}
+            return Response(context)
+
+
+        event.registered_teams.add(team)
+        event.save()
+
+        context = {"success": True, "errors" : ["Team is successfully registered to this event"]}
+        return Response(context)
+        
+
 
         

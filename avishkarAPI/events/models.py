@@ -14,7 +14,14 @@ class EventTeam(models.Model):
 
 
     def __str__(self):
+        #return str(self.is_ready())
         return self.team_id
+
+    def get_teamsize(self):
+        return len(self.team_members.all())
+
+    def is_ready(self):
+        return len(self.pending_members.all()) == 0
 
     def add_team_member(self, user):
         self.team_members.add(user)
@@ -43,7 +50,7 @@ class Event(models.Model):
     event_coordinators = models.ManyToManyField(User)
 
     registration_opened = models.BooleanField(default=True)
-    registered_teams = models.ManyToManyField(User, related_name='participants')
+    registered_teams = models.ManyToManyField(EventTeam, related_name='participants')
 
     def __str__(self):
         return self.event_id
@@ -56,3 +63,6 @@ class Event(models.Model):
 
     def register_team(self, team):
         self.registered_teams.add(team)
+
+    def can_register(self):
+        return self.registration_opened
