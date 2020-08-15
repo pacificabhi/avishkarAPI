@@ -42,6 +42,7 @@ class Event(models.Model):
     event_description = models.TextField(blank=True, null=False, default="")
     event_coordinators = models.ManyToManyField(User)
 
+    registration_opened = models.BooleanField(default=True)
     registered_teams = models.ManyToManyField(User, related_name='participants')
 
     def __str__(self):
