@@ -46,11 +46,16 @@ class AddTeamMember(APIView):
 
     def post(self, request):
 
+
         team_id = request.POST.get("teamid").strip()
         team = EventTeam.objects.filter(team_id=team_id).first()
 
         if not team:
             context = {"success": False, "errors" : ["Team with team id {} is not found".format(team_id)]}
+            return Response(context)
+
+        if request.user != team.team_admin:
+            context = {"success": False, "errors" : ["You are not admin of team {}".format(team_id)]}
             return Response(context)
 
         member_username = request.POST.get("memberusername").strip()
