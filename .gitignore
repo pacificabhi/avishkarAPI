@@ -84,6 +84,7 @@ venv/
 ENV/ 
 env.bak/ 
 venv.bak/ 
+avishkar
 
 # mkdocs documentation 
 /site 

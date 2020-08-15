@@ -5,6 +5,8 @@ from rest_framework.authtoken.models import Token
 from .validations import *
 from .models import UserDetails
 
+from django.views.decorators.csrf import csrf_exempt
+
 class HelloView(APIView):
 
     permission_classes = (IsAuthenticated,)
@@ -15,6 +17,7 @@ class HelloView(APIView):
 
 
 class RegisterUser(APIView):
+
     
     def get(self, request):
         content = {'message': 'Hello, World!'}
@@ -64,3 +67,47 @@ class RegisterUser(APIView):
 
         return Response(context)
 				
+
+
+class UpdateUserNameAndEmail(APIView):
+
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        content = {'message': 'Hello, World!'}
+        return Response(content)
+
+    def post(self, request):
+
+        context = {"success": False}
+        errors = []
+
+        fname = request.POST.get("fname").strip().title()
+        lname = request.POST.get("lname").strip().title()
+        email = request.POST.get("email").strip().lower()
+
+        nerr = invalid_name(fname, lname)
+
+        if user_exists(email):
+            if email != request.user.email:
+                errors.append("Email already taken")
+        
+        elif not check_email_dns(email):
+            errors.append("Invalid Email")
+
+        if nerr:
+            errors.append(nerr)
+
+        if errors:
+            context["errors"]=errors
+            return Response(context)
+
+        request.user.first_name = fname
+        request.user.last_name = lname
+        request.user.email = email
+        request.user.save()
+        context["success"] = True
+        return Response(context)
+
+
+
