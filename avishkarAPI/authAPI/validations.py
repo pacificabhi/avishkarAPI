@@ -61,3 +61,11 @@ def validate_password(password):
 	if(len(password)<8):
 		return False
 	return True
+
+
+def is_valid_number(text):
+    try: 
+        int(text)
+        return True
+    except ValueError:
+        return False

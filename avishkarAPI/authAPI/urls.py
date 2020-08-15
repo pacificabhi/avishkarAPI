@@ -8,5 +8,6 @@ urlpatterns = [
     path('register/', views.RegisterUser.as_view(), name='registeruser'),
     path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
     path('updatenameandemail/', views.UpdateUserNameAndEmail.as_view(), name='updatenameandemail'),
+    path('updatecontact/', views.UpdateUserDetails.as_view() , name='updatecontact'),
     path('hello/', views.HelloView.as_view(), name='hello'),
 ]

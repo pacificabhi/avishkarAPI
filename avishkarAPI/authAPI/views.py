@@ -111,3 +111,47 @@ class UpdateUserNameAndEmail(APIView):
 
 
 
+class UpdateUserDetails(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        content = {'message': 'Hello, World!'}
+        return Response(content)
+
+    def post(self, request):
+
+        context = {"success": False}
+        errors = []
+
+        college = request.POST.get("college").strip()
+        phone = request.POST.get("phone").strip()
+        whatsapp = request.POST.get("whatsapp").strip()
+        msteams = request.POST.get("msteams").strip()
+
+        if not is_valid_number(phone):
+            errors.append("Invalid Phone Number")
+
+        if not is_valid_number(whatsapp):
+            errors.append("Invalid WhatsApp Number")
+
+        if errors:
+            context["errors"]=errors
+            return Response(context)
+
+        ud = request.user.userdetails
+        if not ud.is_fees_paid():
+            ud.college = college
+        ud.phone = phone
+        ud.whatsapp = whatsapp
+        ud.msteams_id = msteams
+
+        ud.save()
+
+        context["success"] = True
+
+        return Response(context)
+
+
+        
+
+
