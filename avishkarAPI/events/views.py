@@ -46,7 +46,6 @@ class AddTeamMember(APIView):
 
     def post(self, request):
 
-
         team_id = request.POST.get("teamid").strip()
         team = EventTeam.objects.filter(team_id=team_id).first()
 
@@ -93,3 +92,95 @@ class AddTeamMember(APIView):
 
         context = {"success": True, "message" : "Join Team request has been sent to {}".format(member_username)}
         return Response(context)
+
+
+class RemoveTeamMember(APIView):
+
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        content = {'message': 'Hello, World!'}
+        return Response(content)
+
+
+    def post(self, request):
+        team_id = request.POST.get("teamid").strip()
+        team = EventTeam.objects.filter(team_id=team_id).first()
+
+        if not team:
+            context = {"success": False, "errors" : ["Team with team id {} is not found".format(team_id)]}
+            return Response(context)
+
+        
+        member_username = request.POST.get("memberusername").strip()
+        member = User.objects.filter(username=member_username).first()
+
+        if not member:
+            context = {"success": False, "errors" : ["User with username {} does not exist".format(member_username)]}
+            return Response(context)
+        
+        if request.user != team.team_admin and request.user != member:
+            context = {"success": False, "errors" : ["Only admin can remove members from team or one can remove themselves"]}
+            return Response(context)
+
+
+        if member in team.team_members.all():
+            team.team_members.remove(member)
+            context = {"success": True, "errors" : ["{} is successfully removed from team {}".format(member_username, team_id)]}
+            return Response(context)
+
+        if member in team.pending_members.all():
+            team.pending_members.remove(member)
+            context = {"success": True, "errors" : ["{} is successfully removed from team {}".format(member_username, team_id)]}
+            return Response(context)
+
+
+        context = {"success": False, "errors" : ["{} is not a member of team {}".format(member_username, team_id)]}
+        return Response(context)
+
+
+class JoinRequestDecision(APIView):
+
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        content = {'message': 'Hello, World!'}
+        return Response(content)
+
+
+    def post(self, request):
+        team_id = request.POST.get("teamid").strip()
+        decision = request.POST.get("decision").strip()
+        team = EventTeam.objects.filter(team_id=team_id).first()
+
+        if not team:
+            context = {"success": False, "errors" : ["Team with team id {} is not found".format(team_id)]}
+            return Response(context)
+
+        member = request.user
+        member_username = member.username
+
+        if not member:
+            context = {"success": False, "errors" : ["User with username {} does not exist".format(member_username)]}
+            return Response(context)
+
+
+        if member in team.team_members.all():
+            context = {"success": False, "errors" : ["{} is already a member of team {}".format(member_username, team_id)]}
+            return Response(context)
+
+        if member in team.pending_members.all():
+            team.pending_members.remove(member)
+            if decision == "accept":
+                team.team_members.add(member)
+                context = {"success": True, "errors" : ["{} is successfully added to team {}".format(member_username, team_id)]}
+            else:
+                context = {"success": True, "errors" : ["{} has declined to join team {}".format(member_username, team_id)]}
+                
+            return Response(context)
+
+        context = {"success": False, "errors" : ["No Join Request"]}
+        return Response(context)
+        
+
+        
