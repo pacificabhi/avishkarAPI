@@ -189,7 +189,6 @@ class UpdateFeesStatus(APIView):
 
         
 
-
 class GetUserDetails(APIView):
     permission_classes = (IsAuthenticated,)
 
@@ -238,7 +237,8 @@ class GetUserDetails(APIView):
                 for y in Event.objects.all():
                     if x in y.registered_teams.all():
                         context["teams"][x.team_id]["registeredEvents"][y.event_id] = {
-                            "eventName":y.event_name
+                            "eventName":y.event_name,
+                            "eventID":y.event_id,
                         }
 
 
