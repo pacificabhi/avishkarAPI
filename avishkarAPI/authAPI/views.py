@@ -242,6 +242,71 @@ class GetUserDetails(APIView):
                         }
 
 
+        return Response(context)
+
+
+class GetUserDetailsByUsername(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        content = {'message': 'Hello, World!'}
+        return Response(content)
+
+    def post(self, request):
+
+        context = {"success": True}
+        errors = []
+
+        if not request.user.is_staff:
+            context = {"success": False, "errors" : ["Only staff members can access user details by username"]}
+            return Response(context)
+
+        username = request.POST.get("username").strip()
+
+        u = User.objects.filter(username=username).first()
+        
+        if not u:
+            context = {"success": False, "errors" : ["{} does not exist".format(username)]}
+            return Response(context)
+
+        ud = u.userdetails
+        
+        context["userName"] = u.username
+        context["email"] = u.email
+        context["email"] = u.email
+        context["firstName"] = u.first_name
+        context["lastName"] = u.last_name
+        context["confirmed"] = ud.confirmed
+        context["feesPaid"] = ud.fees_paid
+        context["whatsapp"] = ud.whatsapp
+        context["phone"] = ud.phone
+        context["college"] = ud.college
+        context["msteamsID"] = ud.msteams_id
+        context["teams"] = {}
+
+
+
+        for x in EventTeam.objects.all():
+            if u in x.team_members.all():
+                context["teams"][x.team_id] = {
+                    "teamID":x.team_id,
+                    "teamAdmin":x.team_admin.username,
+                    "teamName":x.team_name,
+                    "teamMembers":[],
+                    "pendingMembers":[],
+                    "registeredEvents":{},
+                }
+                for y in x.pending_members.all():
+                    context["teams"][x.team_id]["pendingMembers"].append(y.username)
+                for y in x.team_members.all():
+                    context["teams"][x.team_id]["teamMembers"].append(y.username)
+
+                for y in Event.objects.all():
+                    if x in y.registered_teams.all():
+                        context["teams"][x.team_id]["registeredEvents"][y.event_id] = {
+                            "eventName":y.event_name,
+                            "eventID":y.event_id,
+                        }
 
 
         return Response(context)

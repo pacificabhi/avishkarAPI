@@ -223,6 +223,10 @@ class RegisterToEvent(APIView):
             context = {"success": False, "errors" : ["Only admin can register team to contest"]}
             return Response(context)
 
+        if not event.is_open() and team.team_admin.userdetails.college != "MNNIT":
+            context = {"success": False, "errors" : ["This event is exclusively for MNNIT students"]}
+            return Response(context)
+
         if not team.is_ready():
             context = {"success": False, "errors" : ["Team is not ready to register, Team has some pending members request(s)"]}
             return Response(context)
@@ -263,5 +267,95 @@ class RegisterToEvent(APIView):
         return Response(context)
         
 
+# Returns a list to team members with team details
+
+def getTeamDetails(team):
+    team_details = {
+        "team_id": team.team_id,
+        "team_admin": team.team_admin.username,
+        "team_size": team.get_teamsize(),
+    }
+    team_m = []
+    for u in team.team_members.all():
+        context = {}
+        ud = u.userdetails
+        context["userName"] = u.username
+        context["email"] = u.email
+        context["email"] = u.email
+        context["firstName"] = u.first_name
+        context["lastName"] = u.last_name
+        context["confirmed"] = ud.confirmed
+        context["feesPaid"] = ud.fees_paid
+        context["whatsapp"] = ud.whatsapp
+        context["phone"] = ud.phone
+        context["college"] = ud.college
+        context["msteamsID"] = ud.msteams_id
+
+        team_m.append(context)
+
+    team_details["team_members"] = team_m
+
+    return team_details
+
+class GetRegisteredUsersListOfEvent(APIView):
+
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        content = {'message': 'Hello, World!'}
+        return Response(content)
+
+
+    def post(self, request):
+
+
+        if not request.user.is_staff:
+            context = {"success": False, "errors" : ["Only staff members can access details of registered users in an event"]}
+            return Response(context)
+
+
+        event_id = request.POST.get("eventid").strip()
+        event = Event.objects.filter(event_id=event_id).first()
+
+        if not event:
+            context = {"success": False, "errors" : ["{} does not exist".format(event_id)]}
+            return Response(context)
 
         
+        registered_teams = event.registered_teams.all()
+
+        context = {"success": True, "teams": []}
+        teams = []
+        for team in registered_teams:
+            teams.append(getTeamDetails(team))
+
+        context["teams"] = teams
+
+        return Response(context)
+
+
+class GetTeamDetails(APIView):
+
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        content = {'message': 'Hello, World!'}
+        return Response(content)
+
+    def post(self, request):
+        
+        if not request.user.is_staff:
+            context = {"success": False, "errors" : ["Only staff members can access details of a team"]}
+            return Response(context)
+
+        team_id = request.POST.get("teamid").strip()
+        team = EventTeam.objects.filter(team_id=team_id).first()
+
+        if not team:
+            context = {"success": False, "errors" : ["Team does not exist - {}".format(team_id)]}
+            return Response(context)
+
+        team_details = getTeamDetails(team)
+        context = {"success": True, "team_details": team_details}
+
+        return Response(context)
