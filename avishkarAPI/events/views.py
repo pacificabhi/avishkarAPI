@@ -223,6 +223,10 @@ class RegisterToEvent(APIView):
             context = {"success": False, "errors" : ["Only admin can register team to contest"]}
             return Response(context)
 
+        if not event.registration_opened:
+            context = {"success": False, "errors" : ["Registration is closed for this event"]}
+            return Response(context)
+
         if not event.is_open() and team.team_admin.userdetails.college != "MNNIT":
             context = {"success": False, "errors" : ["This event is exclusively for MNNIT students"]}
             return Response(context)
@@ -289,6 +293,7 @@ def getTeamDetails(team):
         context["whatsapp"] = ud.whatsapp
         context["phone"] = ud.phone
         context["college"] = ud.college
+        context["resume"] = ud.resume
         context["msteamsID"] = ud.msteams_id
 
         team_m.append(context)
@@ -359,3 +364,54 @@ class GetTeamDetails(APIView):
         context = {"success": True, "team_details": team_details}
 
         return Response(context)
+
+
+
+class GetEventDetails(APIView):
+
+    def get(self, request):
+        content = {'message': 'Hello, World!'}
+        return Response(content)
+
+    def post(self, request):
+        event_id = request.POST.get("eventid").strip()
+        event = Event.objects.filter(team_id=event_id).first()
+
+        if not event:
+            context = {"success": False, "errors" : ["Event does not exist - {}".format(team_id)]}
+            return Response(context)
+
+        context = {"success": True}
+
+        context["eventID"] = event.event_id
+        context["eventParent"] = event.event_parent
+        context["eventName"] = event.event_name
+        context["teamSize"] = event.get_teamsize()
+        context["eventIcon"] = event.event_icon_link
+        context["eventPoster"] = event.event_poster_link
+        context["eventDescription"] = event.even_description
+        context["openEvent"] = event.is_open()
+        context["registrationOpened"] = event.registration_opened
+        
+
+        cordies = []
+
+        for ec in event.event_coordinators:
+            cordi = {
+                "username": ec.username,
+                "name": ec.get_full_name(),
+                "whatsapp": ec.userdetails.whatsapp,
+                "phone": ec.userdetails.phone,
+                "email": ec.email
+                }
+
+            cordies.append(cordies)
+
+        context["coordinators"] = cordies
+
+
+        return Response(context)
+        
+
+
+        

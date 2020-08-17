@@ -7,5 +7,6 @@ urlpatterns = [
     path('removeteammember/', views.RemoveTeamMember.as_view(), name='removeteammember'),
     path('joinrequestdecision/', views.JoinRequestDecision.as_view(), name='joinrequestdecision'),
     path('registertoevent/', views.RegisterToEvent.as_view(), name='registertoevent'),
+    path('geteventdetails/', views.GetEventDetails.as_view(), name='geteventdetails'),
     path('getregistereduserslistofevent/', views.GetRegisteredUsersListOfEvent.as_view(), name='getregistereduserslistofevent'),
 ]

@@ -133,6 +133,7 @@ class UpdateUserDetails(APIView):
         phone = request.POST.get("phone").strip()
         whatsapp = request.POST.get("whatsapp").strip()
         msteams = request.POST.get("msteams").strip()
+        resume = request.POST.get("resume").strip()
 
         if not is_valid_number(phone):
             errors.append("Invalid Phone Number")
@@ -153,6 +154,7 @@ class UpdateUserDetails(APIView):
         ud.phone = phone
         ud.whatsapp = whatsapp
         ud.msteams_id = msteams
+        ud.resume = resume
 
         ud.save()
 
@@ -171,10 +173,21 @@ class UpdateFeesStatus(APIView):
 
     def post(self, request):
 
+        if not request.user.is_staff:
+            context = {"success": False, errors: ["Only staff member can update fees status"]}
+            return Response(context)
+
         context = {"success": False}
 
         status = request.POST.get("status").strip()
-        ud = request.user.userdetails
+        username = request.POST.get("username").strip()
+        
+        u = User.objects.filter(username=username).first()
+        if not u:
+            context = {"success": False, errors: ["{} does not exist".format(username)]}
+            return Response(context)
+        
+        ud = u.userdetails
         
         if status == "paid":
             ud.fees_paid = True
@@ -215,6 +228,8 @@ class GetUserDetails(APIView):
         context["phone"] = ud.phone
         context["college"] = ud.college
         context["msteamsID"] = ud.msteams_id
+        context["resume"] = ud.resume
+        context["notifications"] = ud.notifications
         context["teams"] = {}
 
 
@@ -264,7 +279,7 @@ class GetUserDetailsByUsername(APIView):
         username = request.POST.get("username").strip()
 
         u = User.objects.filter(username=username).first()
-        
+
         if not u:
             context = {"success": False, "errors" : ["{} does not exist".format(username)]}
             return Response(context)
@@ -282,6 +297,8 @@ class GetUserDetailsByUsername(APIView):
         context["phone"] = ud.phone
         context["college"] = ud.college
         context["msteamsID"] = ud.msteams_id
+        context["resume"] = ud.resume
+        context["notifications"] = ud.notifications
         context["teams"] = {}
 
 
