@@ -223,6 +223,10 @@ class RegisterToEvent(APIView):
             context = {"success": False, "errors" : ["Only admin can register team to contest"]}
             return Response(context)
 
+        if not event.registration_opened:
+            context = {"success": False, "errors" : ["Registration is closed for this event"]}
+            return Response(context)
+
         if not event.is_open() and team.team_admin.userdetails.college != "MNNIT":
             context = {"success": False, "errors" : ["This event is exclusively for MNNIT students"]}
             return Response(context)
@@ -289,6 +293,7 @@ def getTeamDetails(team):
         context["whatsapp"] = ud.whatsapp
         context["phone"] = ud.phone
         context["college"] = ud.college
+        context["resume"] = ud.resume
         context["msteamsID"] = ud.msteams_id
 
         team_m.append(context)
@@ -359,3 +364,80 @@ class GetTeamDetails(APIView):
         context = {"success": True, "team_details": team_details}
 
         return Response(context)
+
+def get_event_details(event):
+    context = {}
+    context["eventID"] = event.event_id
+    context["eventParent"] = event.event_parent
+    context["eventName"] = event.event_name
+    context["teamSize"] = event.get_teamsize()
+    context["eventIcon"] = event.event_icon_link
+    context["eventPoster"] = event.event_poster_link
+    context["eventDescription"] = event.event_description
+    context["openEvent"] = event.is_open()
+    context["registrationOpened"] = event.registration_opened
+
+
+    cordies = []
+
+    for ec in event.event_coordinators.all():
+        cordi = {
+            "username": ec.username,
+            "name": ec.get_full_name(),
+            "whatsapp": ec.userdetails.whatsapp,
+            "phone": ec.userdetails.phone,
+            "email": ec.email
+            }
+
+        cordies.append(cordi)
+
+    context["coordinators"] = cordies
+
+    return context
+
+
+
+class GetEventDetails(APIView):
+
+    def get(self, request):
+        content = {'message': 'Hello, World!'}
+        return Response(content)
+
+    def post(self, request):
+        event_id = request.POST.get("eventid").strip()
+        event = Event.objects.filter(event_id=event_id).first()
+
+        if not event:
+            context = {"success": False, "errors" : ["Event does not exist - {}".format(event_id)]}
+            return Response(context)
+
+        context = {"success": True, "event": get_event_details(event)}
+
+
+        return Response(context)
+
+
+
+class GetAllEvents(APIView):
+
+    def get(self, request):
+        content = {'message': 'Hello, World!'}
+        return Response(content)
+
+    def post(self, request):
+        
+        events_list = []
+
+        events = Event.objects.all()
+
+        for event in events:
+            events_list.append(get_event_details(event))        
+
+        context = {"success": True, "events": events_list}
+
+
+        return Response(context)
+        
+
+
+        
