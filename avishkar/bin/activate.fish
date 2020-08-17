@@ -29,7 +29,7 @@ end
 # unset irrelevant variables
 deactivate nondestructive
 
-set -gx VIRTUAL_ENV "/mnt/c/Users/abhis/Desktop/Avishkar/avishkar"
+set -gx VIRTUAL_ENV "/home/sahaj/Projects/Django/avishkarAPI/avishkar"
 
 set -gx _OLD_VIRTUAL_PATH $PATH
 set -gx PATH "$VIRTUAL_ENV/bin" $PATH
@@ -52,7 +52,7 @@ if test -z "$VIRTUAL_ENV_DISABLE_PROMPT"
         set -l old_status $status
 
         # Prompt override?
-        if test -n "(avishkar) "
+        if test -n "(avishkar) "            
             printf "%s%s" "(avishkar) " (set_color normal)
         else
             # ...Otherwise, prepend env

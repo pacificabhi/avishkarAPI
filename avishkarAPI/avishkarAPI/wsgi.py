@@ -8,6 +8,12 @@ https://docs.djangoproject.com/en/3.1/howto/deployment/wsgi/
 """
 
 import os
+import sys
+
+sys.path.append('/home/sahaj/Projects/Django/avishkarAPI')
+sys.path.append('/home/sahaj/Projects/Django/avishkarAPI/avishkar/lib/python3.6/site-packages')
+
+
 
 from django.core.wsgi import get_wsgi_application
 
