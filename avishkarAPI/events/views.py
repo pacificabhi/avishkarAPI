@@ -365,6 +365,36 @@ class GetTeamDetails(APIView):
 
         return Response(context)
 
+def get_event_details(event):
+    context = {}
+    context["eventID"] = event.event_id
+    context["eventParent"] = event.event_parent
+    context["eventName"] = event.event_name
+    context["teamSize"] = event.get_teamsize()
+    context["eventIcon"] = event.event_icon_link
+    context["eventPoster"] = event.event_poster_link
+    context["eventDescription"] = event.event_description
+    context["openEvent"] = event.is_open()
+    context["registrationOpened"] = event.registration_opened
+
+
+    cordies = []
+
+    for ec in event.event_coordinators.all():
+        cordi = {
+            "username": ec.username,
+            "name": ec.get_full_name(),
+            "whatsapp": ec.userdetails.whatsapp,
+            "phone": ec.userdetails.phone,
+            "email": ec.email
+            }
+
+        cordies.append(cordi)
+
+    context["coordinators"] = cordies
+
+    return context
+
 
 
 class GetEventDetails(APIView):
@@ -375,39 +405,35 @@ class GetEventDetails(APIView):
 
     def post(self, request):
         event_id = request.POST.get("eventid").strip()
-        event = Event.objects.filter(team_id=event_id).first()
+        event = Event.objects.filter(event_id=event_id).first()
 
         if not event:
-            context = {"success": False, "errors" : ["Event does not exist - {}".format(team_id)]}
+            context = {"success": False, "errors" : ["Event does not exist - {}".format(event_id)]}
             return Response(context)
 
-        context = {"success": True}
+        context = {"success": True, "event": get_event_details(event)}
 
-        context["eventID"] = event.event_id
-        context["eventParent"] = event.event_parent
-        context["eventName"] = event.event_name
-        context["teamSize"] = event.get_teamsize()
-        context["eventIcon"] = event.event_icon_link
-        context["eventPoster"] = event.event_poster_link
-        context["eventDescription"] = event.even_description
-        context["openEvent"] = event.is_open()
-        context["registrationOpened"] = event.registration_opened
+
+        return Response(context)
+
+
+
+class GetAllEvents(APIView):
+
+    def get(self, request):
+        content = {'message': 'Hello, World!'}
+        return Response(content)
+
+    def post(self, request):
         
+        events_list = []
 
-        cordies = []
+        events = Event.objects.all()
 
-        for ec in event.event_coordinators:
-            cordi = {
-                "username": ec.username,
-                "name": ec.get_full_name(),
-                "whatsapp": ec.userdetails.whatsapp,
-                "phone": ec.userdetails.phone,
-                "email": ec.email
-                }
+        for event in events:
+            events_list.append(get_event_details(event))        
 
-            cordies.append(cordies)
-
-        context["coordinators"] = cordies
+        context = {"success": True, "events": events_list}
 
 
         return Response(context)

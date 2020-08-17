@@ -8,5 +8,6 @@ urlpatterns = [
     path('joinrequestdecision/', views.JoinRequestDecision.as_view(), name='joinrequestdecision'),
     path('registertoevent/', views.RegisterToEvent.as_view(), name='registertoevent'),
     path('geteventdetails/', views.GetEventDetails.as_view(), name='geteventdetails'),
+    path('getallevents/', views.GetAllEvents.as_view(), name='getallevents'),
     path('getregistereduserslistofevent/', views.GetRegisteredUsersListOfEvent.as_view(), name='getregistereduserslistofevent'),
 ]
