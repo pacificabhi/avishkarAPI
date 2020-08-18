@@ -235,7 +235,7 @@ class GetUserDetails(APIView):
 
 
         for x in EventTeam.objects.all():
-            if u in x.team_members.all():
+            if u in x.team_members.all() or u in x.pending_members.all():
                 context["teams"][x.team_id] = {
                     "teamID":x.team_id,
                     "teamAdmin":x.team_admin.username,
