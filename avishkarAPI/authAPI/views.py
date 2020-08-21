@@ -63,7 +63,7 @@ class RegisterUser(APIView):
         u.save()
 
         ud = UserDetails.objects.create(user = u)
-        if is_mnnit == "true":
+        if is_mnnit == "true" || is_mnnit == "True":
             ud.college = "MNNIT"
             ud.fees_paid = True
             ud.save()
