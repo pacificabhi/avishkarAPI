@@ -24,9 +24,10 @@ BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 SECRET_KEY = 'kq60r^1^4#p5m2(1x$i#f(#1vbtt=t9_ha*d1rv-pvb)wtv*fh'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ["avishkarapi.sahajbamba.me"]
+ALLOWED_HOSTS = ["*"]
+#ALLOWED_HOSTS = ["avishkarapi.sahajbamba.me,*"]
 
 
 # Application definition
@@ -42,6 +43,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'authAPI',
     'events',
+    'corsheaders',
 ]
 
 
@@ -55,6 +57,7 @@ REST_FRAMEWORK = {
 
 
 MIDDLEWARE = [
+        'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -64,6 +67,11 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
+CORS_ORIGIN_WHITELIST = [
+        'http://127.0.0.1:5500',
+]
 ROOT_URLCONF = 'avishkarAPI.urls'
 
 TEMPLATES = [
