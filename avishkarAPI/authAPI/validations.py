@@ -64,8 +64,11 @@ def validate_password(password):
 
 
 def is_valid_number(text):
-    try: 
-        int(text)
-        return True
-    except ValueError:
-        return False
+
+	try:
+		if text[0] == '+':
+			text = text[1:]
+		int(text)
+		return True
+	except ValueError:
+		return False
