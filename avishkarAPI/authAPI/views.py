@@ -72,7 +72,22 @@ class RegisterUser(APIView):
         context["token"] = token[0].key
 
         return Response(context)
-				
+
+
+class UserLogout(APIView):
+
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        content = {'message': 'Hello, World!'}
+        return Response(content)	
+
+    def post(self, request):
+        context = {"success": True}
+
+        request.user.auth_token.delete()
+
+        return Response(context)
 
 
 class UpdateUserNameAndEmail(APIView):
@@ -254,6 +269,7 @@ class GetUserDetails(APIView):
                         context["teams"][x.team_id]["registeredEvents"][y.event_id] = {
                             "eventName":y.event_name,
                             "eventID":y.event_id,
+                            "eventParent":y.event_parent,
                         }
 
 
