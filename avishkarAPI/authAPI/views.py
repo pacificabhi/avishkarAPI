@@ -245,6 +245,7 @@ class GetUserDetails(APIView):
         context["msteamsID"] = ud.msteams_id
         context["resume"] = ud.resume
         context["notifications"] = ud.notifications
+        context["isStaff"] = u.is_staff
         context["teams"] = {}
 
 
