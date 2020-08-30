@@ -23,7 +23,7 @@ def check_email_dns(email):
 
 
 def invalid_name(first_name, last_name):
-	pattern=r'[^a-zA-Z]'
+	pattern=r'[^a-zA-Z ]'
 	if(re.search(pattern, first_name) or re.search(pattern, last_name)):
 		return "Invalid Name, Only (A-Z) is allowed, No spaces allowed"
 	return False
