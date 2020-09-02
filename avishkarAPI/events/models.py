@@ -39,7 +39,7 @@ class EventTeam(models.Model):
 
 class Event(models.Model):
 
-    event_id = models.CharField(max_length=50, blank=False, null=False, default="")
+    event_id = models.CharField(max_length=50, blank=False, null=False, default="", unique=True)
     event_parent = models.CharField(max_length=50, blank=False, null=False, default="")
     event_name = models.CharField(max_length=255, blank=False, null=False, default="")
     team_size = models.IntegerField(default=1)
