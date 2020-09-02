@@ -125,6 +125,11 @@ class RemoveTeamMember(APIView):
         if not member:
             context = {"success": False, "errors" : ["User with username {} does not exist".format(member_username)]}
             return Response(context)
+
+
+        if member == team.team_admin:
+            context = {"success": False, "errors" : ["Admin cannot be removed"]}
+            return Response(context)
         
         if request.user != team.team_admin and request.user != member:
             context = {"success": False, "errors" : ["Only admin can remove members from team or one can remove themselves"]}
