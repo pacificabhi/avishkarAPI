@@ -276,7 +276,7 @@ class RegisterToEvent(APIView):
 def getTeamDetails(team):
     team_details = {
         "team_id": team.team_id,
-        "team_name": team.team_name
+        "team_name": team.team_name,
         "team_admin": team.team_admin.username,
         "team_size": team.get_teamsize(),
     }
