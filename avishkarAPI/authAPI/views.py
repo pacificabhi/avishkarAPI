@@ -63,7 +63,7 @@ class RegisterUser(APIView):
         u.save()
 
         ud = UserDetails.objects.create(user = u)
-        if is_mnnit == "true":
+        if is_mnnit == "true" or is_mnnit == "True":
             ud.college = "MNNIT"
             ud.fees_paid = True
             ud.save()
@@ -72,7 +72,22 @@ class RegisterUser(APIView):
         context["token"] = token[0].key
 
         return Response(context)
-				
+
+
+class UserLogout(APIView):
+
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        content = {'message': 'Hello, World!'}
+        return Response(content)	
+
+    def post(self, request):
+        context = {"success": True}
+
+        request.user.auth_token.delete()
+
+        return Response(context)
 
 
 class UpdateUserNameAndEmail(APIView):
@@ -133,6 +148,7 @@ class UpdateUserDetails(APIView):
         phone = request.POST.get("phone").strip()
         whatsapp = request.POST.get("whatsapp").strip()
         msteams = request.POST.get("msteams").strip()
+        resume = request.POST.get("resume").strip()
 
         if not is_valid_number(phone):
             errors.append("Invalid Phone Number")
@@ -153,6 +169,7 @@ class UpdateUserDetails(APIView):
         ud.phone = phone
         ud.whatsapp = whatsapp
         ud.msteams_id = msteams
+        ud.resume = resume
 
         ud.save()
 
@@ -171,10 +188,21 @@ class UpdateFeesStatus(APIView):
 
     def post(self, request):
 
+        if not request.user.is_staff:
+            context = {"success": False, errors: ["Only staff member can update fees status"]}
+            return Response(context)
+
         context = {"success": False}
 
         status = request.POST.get("status").strip()
-        ud = request.user.userdetails
+        username = request.POST.get("username").strip()
+        
+        u = User.objects.filter(username=username).first()
+        if not u:
+            context = {"success": False, errors: ["{} does not exist".format(username)]}
+            return Response(context)
+        
+        ud = u.userdetails
         
         if status == "paid":
             ud.fees_paid = True
@@ -188,7 +216,6 @@ class UpdateFeesStatus(APIView):
         return Response(context)
 
         
-
 
 class GetUserDetails(APIView):
     permission_classes = (IsAuthenticated,)
@@ -216,6 +243,79 @@ class GetUserDetails(APIView):
         context["phone"] = ud.phone
         context["college"] = ud.college
         context["msteamsID"] = ud.msteams_id
+        context["resume"] = ud.resume
+        context["notifications"] = ud.notifications
+        context["isStaff"] = u.is_staff
+        context["teams"] = {}
+
+
+
+        for x in EventTeam.objects.all():
+            if u in x.team_members.all() or u in x.pending_members.all():
+                context["teams"][x.team_id] = {
+                    "teamID":x.team_id,
+                    "teamAdmin":x.team_admin.username,
+                    "teamName":x.team_name,
+                    "teamMembers":[],
+                    "pendingMembers":[],
+                    "registeredEvents":{},
+                }
+                for y in x.pending_members.all():
+                    context["teams"][x.team_id]["pendingMembers"].append(y.username)
+                for y in x.team_members.all():
+                    context["teams"][x.team_id]["teamMembers"].append(y.username)
+
+                for y in Event.objects.all():
+                    if x in y.registered_teams.all():
+                        context["teams"][x.team_id]["registeredEvents"][y.event_id] = {
+                            "eventName":y.event_name,
+                            "eventID":y.event_id,
+                            "eventParent":y.event_parent,
+                        }
+
+
+        return Response(context)
+
+
+class GetUserDetailsByUsername(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        content = {'message': 'Hello, World!'}
+        return Response(content)
+
+    def post(self, request):
+
+        context = {"success": True}
+        errors = []
+
+        if not request.user.is_staff:
+            context = {"success": False, "errors" : ["Only staff members can access user details by username"]}
+            return Response(context)
+
+        username = request.POST.get("username").strip()
+
+        u = User.objects.filter(username=username).first()
+
+        if not u:
+            context = {"success": False, "errors" : ["{} does not exist".format(username)]}
+            return Response(context)
+
+        ud = u.userdetails
+        
+        context["userName"] = u.username
+        context["email"] = u.email
+        context["email"] = u.email
+        context["firstName"] = u.first_name
+        context["lastName"] = u.last_name
+        context["confirmed"] = ud.confirmed
+        context["feesPaid"] = ud.fees_paid
+        context["whatsapp"] = ud.whatsapp
+        context["phone"] = ud.phone
+        context["college"] = ud.college
+        context["msteamsID"] = ud.msteams_id
+        context["resume"] = ud.resume
+        context["notifications"] = ud.notifications
         context["teams"] = {}
 
 
@@ -238,10 +338,9 @@ class GetUserDetails(APIView):
                 for y in Event.objects.all():
                     if x in y.registered_teams.all():
                         context["teams"][x.team_id]["registeredEvents"][y.event_id] = {
-                            "eventName":y.event_name
+                            "eventName":y.event_name,
+                            "eventID":y.event_id,
                         }
-
-
 
 
         return Response(context)

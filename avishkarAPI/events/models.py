@@ -39,7 +39,7 @@ class EventTeam(models.Model):
 
 class Event(models.Model):
 
-    event_id = models.CharField(max_length=50, blank=False, null=False, default="")
+    event_id = models.CharField(max_length=50, blank=False, null=False, default="", unique=True)
     event_parent = models.CharField(max_length=50, blank=False, null=False, default="")
     event_name = models.CharField(max_length=255, blank=False, null=False, default="")
     team_size = models.IntegerField(default=1)
@@ -48,6 +48,7 @@ class Event(models.Model):
 
     event_description = models.TextField(blank=True, null=False, default="")
     event_coordinators = models.ManyToManyField(User)
+    open_event = models.BooleanField(default=False)
 
     registration_opened = models.BooleanField(default=True)
     registered_teams = models.ManyToManyField(EventTeam, related_name='participants')
@@ -66,3 +67,6 @@ class Event(models.Model):
 
     def can_register(self):
         return self.registration_opened
+
+    def is_open(self):
+        return self.open_event
