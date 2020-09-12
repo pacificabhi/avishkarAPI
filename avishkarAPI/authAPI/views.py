@@ -50,6 +50,7 @@ class RegisterUser(APIView):
         elif not check_email_dns(email):
             errors.append("Invalid Email")
 
+
         if not validate_password(password):
             errors.append("Password must be 8 characters long")
 

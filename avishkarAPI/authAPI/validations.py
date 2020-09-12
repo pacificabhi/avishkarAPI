@@ -7,18 +7,19 @@ proxies=None
 
 
 def check_email_dns(email):
-	return True
-	r = requests.get("https://pozzad-email-validator.p.mashape.com/emailvalidator/validateEmail/%s"%(email),
+	#return True
+	r = requests.get("https://api.trumail.io/v2/lookups/json?email=%s"%(email),
 	  headers={
-	    "X-Mashape-Key": "LEvSDDoKLumshP4K4uDLKh9OGMD0p1jmHPWjsnlxByMKQO6KLM",
-	    "X-Mashape-Host": "pozzad-email-validator.p.mashape.com"
+	    
 	  },
 	  proxies=proxies
 	)
 	
 	j=json.loads(r.content.decode('ascii'))
-
-	return j["isValid"]
+	print(j)
+	if j["validFormat"] and j["deliverable"] and j["hostExists"]:
+		return True
+	return False
 
 
 
