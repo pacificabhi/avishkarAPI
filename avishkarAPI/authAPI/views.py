@@ -110,6 +110,9 @@ class UpdateUserNameAndEmail(APIView):
 
         nerr = invalid_name(fname, lname)
 
+        if request.user.userdetails.is_user_confirmed : 
+            errors.append("User details already locked.")    
+
         if user_exists(email):
             if email != request.user.email:
                 errors.append("Email already taken")
@@ -132,6 +135,36 @@ class UpdateUserNameAndEmail(APIView):
         return Response(context)
 
 
+class LockUser(APIView):
+
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        content = {'message': 'Hello, World!'}
+        return Response(content)
+
+    def post(self, request):
+
+        context = {"success": False}
+        errors = []
+
+        u = request.user
+        ud = request.user.userdetails
+
+        if u.first_name and u.email and ud.college and ud.phone and ud.whatsapp and ud.msteams and ud.resume :
+            pass
+        else :
+            errors.append("User details missing.")
+
+        if errors:
+            context["errors"]=errors
+            return Response(context)
+
+        ud.confirmed = True 
+        ud.save()
+        context["success"] = True
+        return Response(context)
+
 
 class UpdateUserDetails(APIView):
     permission_classes = (IsAuthenticated,)
@@ -151,6 +184,9 @@ class UpdateUserDetails(APIView):
         msteams = request.POST.get("msteams").strip()
         resume = request.POST.get("resume").strip()
 
+        if request.user.userdetails.is_user_confirmed : 
+            errors.append("User details already locked.")
+ 
         if not is_valid_number(phone):
             errors.append("Invalid Phone Number")
 
