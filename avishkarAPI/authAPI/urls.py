@@ -6,6 +6,7 @@ from rest_framework.authtoken.views import obtain_auth_token  # <-- Here
 
 urlpatterns = [
     path('register/', views.RegisterUser.as_view(), name='registeruser'),
+    path('lock/', views.LockUser.as_view(), name='LockUser'),
     path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
     path('logout/', views.UserLogout.as_view(), name='logout'),
     path('updatenameandemail/', views.UpdateUserNameAndEmail.as_view(), name='updatenameandemail'),

@@ -22,6 +22,12 @@ class CreateTeam(APIView):
             context = {"success": False, "errors": ["You are an event staff member, You can not create teams"]}
             return Response(context)
 
+        if request.user.userdetails.is_user_confirmed : 
+            pass
+        else :
+            context = {"success": False, "errors": ["Lock your details before proceeding with team creation."]}
+            return Response(context)        
+
         team_name = request.POST.get("teamname").strip()
         team = EventTeam.objects.create(team_name=team_name, team_admin=u)
  
@@ -70,6 +76,12 @@ class AddTeamMember(APIView):
 
         if member.is_staff:
             context = {"success": False, "errors" : ["User with username {} is staff member".format(member_username)]}
+            return Response(context)
+
+        if member.userdetails.is_user_confirmed : 
+            pass
+        else :
+            context = {"success": False, "errors" : ["User with username {} is not eligible because of not confirming his details".format(member_username)]}
             return Response(context)
 
         if not member.userdetails.is_fees_paid():
