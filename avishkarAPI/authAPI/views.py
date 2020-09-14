@@ -183,9 +183,6 @@ class UpdateUserDetails(APIView):
         whatsapp = request.POST.get("whatsapp").strip()
         msteams = request.POST.get("msteams").strip()
         resume = request.POST.get("resume").strip()
-
-        if request.user.userdetails.is_user_confirmed : 
-            errors.append("User details already locked.")
  
         if not is_valid_number(phone):
             errors.append("Invalid Phone Number")
