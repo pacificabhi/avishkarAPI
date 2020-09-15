@@ -8,16 +8,23 @@ proxies=None
 
 def check_email_dns(email):
 	#return True
-	r = requests.get("https://api.trumail.io/v2/lookups/json?email=%s"%(email),
-	  headers={
-	    
-	  },
-	  proxies=proxies
-	)
+
+	url = "https://community-neutrino-email-validate.p.rapidapi.com/email-validate"
+
+	payload = "email=" + email
+	headers = {
+		'x-rapidapi-host': "community-neutrino-email-validate.p.rapidapi.com",
+		'x-rapidapi-key': "8b5a338ae0msh1bd0ef0295a3fd4p128753jsnedc265ba43d9",
+		'content-type': "application/x-www-form-urlencoded"
+		}
+
+	response = requests.request("POST", url, data=payload, headers=headers)
 	
-	j=json.loads(r.content.decode('ascii'))
-	print(j)
-	if j["validFormat"] and j["deliverable"] and j["hostExists"]:
+	#print(response.text)
+
+	j=json.loads(response.content.decode('ascii'))
+	#print(j)
+	if "valid" in j.keys() and j["valid"]:
 		return True
 	return False
 
