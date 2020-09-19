@@ -190,8 +190,12 @@ class UpdateUserDetails(APIView):
         if not is_valid_number(whatsapp):
             errors.append("Invalid WhatsApp Number")
 
-        if college == "MNNIT":
-            errors.append("College name MNNIT is not allowed")
+        if college == "" or len(college) == 0 or college == "MNNIT":
+            errors.append("College name 'MNNIT' or empty is not allowed")
+
+        if not msteams or not resume or msteams == "" or resume == "" or len(msteams) == 0 or len(resume) == 0:
+            errors.append("All details are not filled. Fill NA, if not applicable")
+
 
         if errors:
             context["errors"]=errors
