@@ -1,6 +1,10 @@
 import re, requests, json
 from django.contrib.auth.models import User
 
+import secrets
+from django.core.mail import send_mail, EmailMessage
+from django.conf import settings
+
 
 #proxies = {'http': 'http://edcguest:edcguest@172.31.102.29:3128','https': 'https://edcguest:edcguest@172.31.102.29:3128','ftp': 'ftp://edcguest:edcguest@172.31.102.29:3128'}
 proxies=None
@@ -80,3 +84,36 @@ def is_valid_number(text):
 		return True
 	except ValueError:
 		return False
+
+
+def send_info_mail(user, subject, message):
+
+	email_from = settings.EMAIL_HOST_USER
+	recipient_list = [user.email,]
+
+	msg = EmailMessage(subject=subject, body=message, from_email=email_from, to=recipient_list)
+	msg.content_subtype = "html"  # Main content is now text/html
+	res = msg.send()
+	
+	return res
+
+
+
+def send_password_reset_mail(user):
+
+	subject = 'Password Reset'
+	new_pass = secrets.token_urlsafe(15)
+	
+	email_from = settings.EMAIL_HOST_USER
+	recipient_list = [user.email,]
+	user.userdetails.temp_pass_value = new_pass
+	user.userdetails.temp_pass = True
+
+	message = "You are recieving this mail because you requested for temporary password password.<br><br> Your username is <b>%s</b><br><br>Your Temporary Password is <font color='red'><b>%s</b></font><br><br><b>Note:</b> Please change your password after you log in with this password.<br><br>Thank you"%(user.username, new_pass)
+
+	msg = EmailMessage(subject=subject, body=message, from_email=email_from, to=recipient_list)
+	msg.content_subtype = "html"  # Main content is now text/html
+	res = msg.send()
+	if res:
+		user.userdetails.save()
+	return res

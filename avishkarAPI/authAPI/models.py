@@ -10,6 +10,9 @@ class UserDetails(models.Model):
 	confirm_token = models.CharField(max_length=256 ,blank=True, null=False, default="")
 	fees_paid = models.BooleanField(default=False)
 
+	temp_pass = models.BooleanField(default=False)
+	temp_pass_value = models.CharField(max_length=24, blank=True, null=False, default="")
+
 	whatsapp = models.CharField(max_length=16, blank=True, null=False, default="")
 	phone = models.CharField(max_length=16, blank=True, null=False, default="")
 	college = models.TextField(max_length=255, blank=True, null=False, default="")

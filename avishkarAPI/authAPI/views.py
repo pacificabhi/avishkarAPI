@@ -6,6 +6,8 @@ from .validations import *
 from .models import UserDetails
 from events.models import EventTeam,Event
 
+from django.contrib.auth import authenticate
+
 from django.views.decorators.csrf import csrf_exempt
 
 class HelloView(APIView):
@@ -72,8 +74,102 @@ class RegisterUser(APIView):
         token = Token.objects.get_or_create(user=u)
         context["token"] = token[0].key
 
+        info_msg = "You are successfully registered for Avishkar 2020. Your username is <span style='color: green; font-weight:bold;'>{}</span> and password is <span style='color: red; font-weight:bold;'>{}</span>".format(u.username, password)
+        send_info_mail(u, "Avishkar 2020 Registration", info_msg)
+
         return Response(context)
 
+class UserLogin(APIView):
+
+    def post(self, request):
+        context = {"success": True, "loggedin": False, "temp": False}
+        if request.user.is_authenticated:
+            context["success"]=False
+            context["loggedin"]=True
+            return Response(context)
+        
+        errors = []
+        username = request.POST.get("username").strip().lower()
+        password = request.POST.get("password")
+        
+        u = get_user(username)
+        ud = None
+        if not u:
+            errors.append("No Account Found")
+            
+        elif not u.is_active:
+            errors.append("Acount is deactivated. Contact us to activate it.")
+            
+        else:
+            ud = u.userdetails
+            if not (ud.temp_pass and password == ud.temp_pass_value):
+                u=authenticate(username=u.username, password=password)
+            else:
+                context["temp"] = True
+            
+            if not u:
+                errors.append("Wrong Password")
+
+        if u and not ud:
+            errors.append("Something Went Wrong")
+
+        if errors:
+            context["success"]=False
+            context["errors"]=errors
+            return Response(context)
+            
+        token = Token.objects.get_or_create(user=u)
+        context["token"] = token[0].key
+        ud.temp_pass = False
+        ud.temp_pass_value = ""
+        ud.save()
+        
+        return Response(context)
+
+
+class ResetPassword(APIView):
+
+    def post(self, request):
+        username = request.POST.get("username").strip().lower()
+        context = {"success": True}
+        errors = []
+        u = User.objects.filter(username=username).first()
+
+        if not u:
+            errors.append("User doesnot exist")
+
+        if errors:
+            context["errors"] = errors
+            return Response(context)
+
+        res = send_password_reset_mail(u)
+
+        if not res:
+            context["success"] = False
+            context["errors"] = ["Something went wrong"]
+            return Response(context)
+
+        context["message"] = "Reset password instructions is sent to {}".format(u.email)
+        return Response(context)
+
+
+class ChangePassword(APIView):
+
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        password = request.POST.get("password")
+        context = {"success": True}
+
+        if len(password) < 6:
+            context["success"] = False
+            context["errors"] = ["Password must be of more than 6 characters."]
+            return Response(context)
+
+        request.user.set_password(password)
+        request.user.save()
+
+        return Response(context)
 
 class UserLogout(APIView):
 

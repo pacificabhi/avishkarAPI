@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
 from .models import *
-
+from authAPI.validations import send_info_mail
 
 
 class CreateTeam(APIView):
@@ -105,6 +105,9 @@ class AddTeamMember(APIView):
             return Response(context)
 
         team.pending_members.add(member)
+        message = "You have a team join request from <span style='color: green; font-weight:bold;'>{} ({})</span>. Check your profile <span style='color: red; font-weight:bold;'>{}</span> to accept request.".format(team.team_id, team.team_name, member.username)
+
+        send_info_mail(member, "Avishkar Team Request", message)
 
         context = {"success": True, "message" : "Join Team request has been sent to {}".format(member_username)}
         return Response(context)
@@ -150,6 +153,9 @@ class RemoveTeamMember(APIView):
 
         if member in team.team_members.all():
             team.team_members.remove(member)
+            message = "You have been removed from <span style='color: green; font-weight:bold;'>{} ({})</span>. Check your profile <span style='color: red; font-weight:bold;'>{}</span>.".format(team.team_id, team.team_name, member.username)
+            send_info_mail(member, "Avishkar Team removal", message)
+
             context = {"success": True, "errors" : ["{} is successfully removed from team {}".format(member_username, team_id)]}
             return Response(context)
 
@@ -197,6 +203,10 @@ class JoinRequestDecision(APIView):
             team.pending_members.remove(member)
             if decision == "accept":
                 team.team_members.add(member)
+
+                message = "{} has accepted team join request for <span style='color: green; font-weight:bold;'>{} ({})</span>. Check your profile <span style='color: red; font-weight:bold;'>{}</span>.".format(member.username, team.team_id, team.team_name, team.team_admin.username)
+                send_info_mail(team.team_admin, "Avishkar Team Accept", message)
+
                 context = {"success": True, "errors" : ["{} is successfully added to team {}".format(member_username, team_id)]}
             else:
                 context = {"success": True, "errors" : ["{} has declined to join team {}".format(member_username, team_id)]}
@@ -283,6 +293,9 @@ class RegisterToEvent(APIView):
 
         event.registered_teams.add(team)
         event.save()
+
+        message = "You are successfully register in event {} with your team <span style='color: green; font-weight:bold;'>{} ({})</span>. All the best".format(event.event_name, team.team_id, team.team_admin)
+        send_info_mail(team.team_admin, "Avishkar event registration", message)
 
         context = {"success": True, "errors" : ["Team is successfully registered to this event"]}
         return Response(context)
