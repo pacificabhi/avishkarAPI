@@ -279,6 +279,8 @@ class UpdateUserDetails(APIView):
         whatsapp = request.POST.get("whatsapp").strip()
         msteams = request.POST.get("msteams").strip()
         resume = request.POST.get("resume").strip()
+
+        ud = request.user.userdetails
  
         if not is_valid_number(phone):
             errors.append("Invalid Phone Number")
@@ -286,7 +288,7 @@ class UpdateUserDetails(APIView):
         if not is_valid_number(whatsapp):
             errors.append("Invalid WhatsApp Number")
 
-        if college == "" or len(college) == 0 or college == "MNNIT":
+        if (not ud.is_fees_paid()) and (college == "" or len(college) == 0 or college == "MNNIT"):
             errors.append("College name 'MNNIT' or empty is not allowed")
 
         if not msteams or not resume or msteams == "" or resume == "" or len(msteams) == 0 or len(resume) == 0:
@@ -297,9 +299,10 @@ class UpdateUserDetails(APIView):
             context["errors"]=errors
             return Response(context)
 
-        ud = request.user.userdetails
+        
         if not ud.is_fees_paid():
             ud.college = college
+
         ud.phone = phone
         ud.whatsapp = whatsapp
         ud.msteams_id = msteams
