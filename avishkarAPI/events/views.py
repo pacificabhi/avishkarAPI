@@ -325,6 +325,7 @@ def getTeamDetails(team):
         context["phone"] = ud.phone
         context["college"] = ud.college
         context["resume"] = ud.resume
+        context["regno"] = ud.registration_number
         context["msteamsID"] = ud.msteams_id
 
         team_m.append(context)

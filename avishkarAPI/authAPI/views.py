@@ -385,6 +385,7 @@ class GetUserDetails(APIView):
         context["resume"] = ud.resume
         context["notifications"] = ud.notifications
         context["isStaff"] = u.is_staff
+        context["regno"] = ud.registration_number
         context["teams"] = {}
 
 
@@ -455,6 +456,7 @@ class GetUserDetailsByUsername(APIView):
         context["msteamsID"] = ud.msteams_id
         context["resume"] = ud.resume
         context["notifications"] = ud.notifications
+        context["regno"] = ud.registration_number
         context["teams"] = {}
 
 
