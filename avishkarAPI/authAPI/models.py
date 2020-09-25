@@ -17,6 +17,7 @@ class UserDetails(models.Model):
 	phone = models.CharField(max_length=16, blank=True, null=False, default="")
 	college = models.TextField(max_length=255, blank=True, null=False, default="")
 	msteams_id = models.CharField(max_length=200, blank=True, null = False, default="")
+	registration_number = models.CharField(max_length=30, blank=True, null=False, default="")
 
 	resume = models.TextField(max_length=5000, blank=True, null=False, default="")
 	notifications = models.TextField(max_length=5000, blank=True, null=False, default="")

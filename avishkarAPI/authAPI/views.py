@@ -279,6 +279,7 @@ class UpdateUserDetails(APIView):
         whatsapp = request.POST.get("whatsapp").strip()
         msteams = request.POST.get("msteams").strip()
         resume = request.POST.get("resume").strip()
+        registration_number = request.POST.get("regno").strip()
 
         ud = request.user.userdetails
  
@@ -291,7 +292,7 @@ class UpdateUserDetails(APIView):
         if (not ud.is_fees_paid()) and (college == "" or len(college) == 0 or college == "MNNIT"):
             errors.append("College name 'MNNIT' or empty is not allowed")
 
-        if not msteams or not resume or msteams == "" or resume == "" or len(msteams) == 0 or len(resume) == 0:
+        if not registration_number or not msteams or not resume or msteams == "" or resume == "" or len(msteams) == 0 or len(resume) == 0 or registration_number == "" or len(registration_number) == 0:
             errors.append("All details are not filled. Fill NA, if not applicable")
 
 
@@ -307,6 +308,7 @@ class UpdateUserDetails(APIView):
         ud.whatsapp = whatsapp
         ud.msteams_id = msteams
         ud.resume = resume
+        ud.registration_number = registration_number
 
         ud.save()
 
