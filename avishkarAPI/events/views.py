@@ -22,10 +22,10 @@ class CreateTeam(APIView):
             context = {"success": False, "errors": ["You are an event staff member, You can not create teams"]}
             return Response(context)
 
-        if request.user.userdetails.is_user_confirmed : 
+        if request.user.userdetails.is_user_confirmed and request.user.userdetails.is_fees_paid() : 
             pass
         else :
-            context = {"success": False, "errors": ["Lock your details before proceeding with team creation."]}
+            context = {"success": False, "errors": ["Lock your details before proceeding with team creation or your fees is not paid"]}
             return Response(context)        
 
         team_name = request.POST.get("teamname").strip()
