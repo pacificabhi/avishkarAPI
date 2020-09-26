@@ -109,7 +109,7 @@ def send_password_reset_mail(user):
 	user.userdetails.temp_pass_value = new_pass
 	user.userdetails.temp_pass = True
 
-	message = "You are recieving this mail because you requested for temporary password password.<br><br> Your username is <b>%s</b><br><br>Your Temporary Password is <font color='red'><b>%s</b></font><br><br><b>Note:</b> Please change your password after you log in with this password.<br><br>Thank you"%(user.username, new_pass)
+	message = "You are recieving this mail because you requested for temporary password. This password will work only for first login after you requested for this password.<br><br> Your username is <b>%s</b><br><br>Your Temporary Password is <font color='red'><b>%s</b></font><br><br><b>Note:</b> Please change your password after you log in with this password.<br><br>Thank you"%(user.username, new_pass)
 
 	msg = EmailMessage(subject=subject, body=message, from_email=email_from, to=recipient_list)
 	msg.content_subtype = "html"  # Main content is now text/html
