@@ -6,31 +6,13 @@ from django.core.mail import send_mail, EmailMessage
 from django.conf import settings
 
 
+
 #proxies = {'http': 'http://edcguest:edcguest@172.31.102.29:3128','https': 'https://edcguest:edcguest@172.31.102.29:3128','ftp': 'ftp://edcguest:edcguest@172.31.102.29:3128'}
 proxies=None
 
 
 def check_email_dns(email):
-	#return True
-
-	url = "https://community-neutrino-email-validate.p.rapidapi.com/email-validate"
-
-	payload = "email=" + email
-	headers = {
-		'x-rapidapi-host': "community-neutrino-email-validate.p.rapidapi.com",
-		'x-rapidapi-key': "8b5a338ae0msh1bd0ef0295a3fd4p128753jsnedc265ba43d9",
-		'content-type': "application/x-www-form-urlencoded"
-		}
-
-	response = requests.request("POST", url, data=payload, headers=headers)
-	
-	#print(response.text)
-
-	j=json.loads(response.content.decode('ascii'))
-	#print(j)
-	if "valid" in j.keys() and j["valid"]:
-		return True
-	return False
+	return True
 
 
 
