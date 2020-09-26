@@ -207,7 +207,7 @@ class UpdateUserNameAndEmail(APIView):
         nerr = invalid_name(fname, lname)
 
         if request.user.userdetails.is_user_confirmed : 
-            errors.append("User details already locked.")    
+            errors.append("User details are already locked.")    
 
         if user_exists(email):
             if email != request.user.email:
@@ -247,7 +247,7 @@ class LockUser(APIView):
         u = request.user
         ud = request.user.userdetails
 
-        if u.first_name and u.email and ud.college and ud.phone and ud.whatsapp and ud.msteams and ud.resume :
+        if u.first_name and u.email and ud.college and ud.phone and ud.whatsapp and ud.msteams and ud.resume and ud.registration_number :
             pass
         else :
             errors.append("User details missing.")
