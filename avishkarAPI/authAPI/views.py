@@ -301,7 +301,7 @@ class UpdateUserDetails(APIView):
             return Response(context)
 
         
-        if not ud.is_fees_paid():
+        if not ud.is_fees_paid() and not ud.confirmed:
             ud.college = college
 
         if not ud.confirmed:
