@@ -304,11 +304,14 @@ class UpdateUserDetails(APIView):
         if not ud.is_fees_paid():
             ud.college = college
 
+        if not ud.confirmed:
+            ud.registration_number = registration_number
+
+
         ud.phone = phone
         ud.whatsapp = whatsapp
         ud.msteams_id = msteams
         ud.resume = resume
-        ud.registration_number = registration_number
 
         ud.save()
 
