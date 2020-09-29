@@ -299,6 +299,61 @@ class RegisterToEvent(APIView):
 
         context = {"success": True, "errors" : ["Team is successfully registered to this event"]}
         return Response(context)
+
+
+class UnregisterToEvent(APIView):
+
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        content = {'message': 'Hello, World!'}
+        return Response(content)
+
+    def post(self, request):
+        team_id = request.POST.get("teamid").strip()
+        event_id = request.POST.get("eventid").strip()
+
+
+        event = Event.objects.filter(event_id=event_id).first()
+
+        if not event:
+            context = {"success": False, "errors" : ["Event with event id {} is not found".format(event_id)]}
+            return Response(context)
+
+        if not event.can_register():
+            context = {"success": False, "errors" : ["Registration for this event is closed so you can not unregister."]}
+            return Response(context)
+
+        team = EventTeam.objects.filter(team_id=team_id).first()
+        if not team:
+            context = {"success": False, "errors" : ["Team with team id {} is not found".format(team_id)]}
+            return Response(context)
+
+        print(request.user.username == team.team_admin.username)
+        print(request.user.username, team.team_admin.username, team.team_id)
+
+        if not (request.user.username == team.team_admin.username or request.user.is_staff):
+            context = {"success": False, "errors" : ["Only admin {} can unregister team from event".format(team.team_admin.username)]}
+            return Response(context)
+
+
+        registered_teams = event.registered_teams.all()
+
+        if not (team in registered_teams):
+            context = {"success": False, "errors" : ["Team is not registered to this event"]}
+            return Response(context)
+
+        event.registered_teams.remove(team)
+        event.save()
+
+        message = "You are successfully unregister from event {} with your team <span style='color: green; font-weight:bold;'>{} ({})</span>. All the best".format(event.event_name, team.team_id, team.team_admin)
+        send_info_mail(team.team_admin, "Avishkar event registration", message)
+
+        context = {"success": True, "errors" : ["Team is successfully unregistered to this event"]}
+        return Response(context)
+
+
+
         
 
 # Returns a list to team members with team details

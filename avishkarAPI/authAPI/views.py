@@ -133,8 +133,10 @@ class ResetPassword(APIView):
         username = request.POST.get("username").strip().lower()
         context = {"success": True}
         errors = []
-        u = User.objects.filter(username=username).first()
 
+        u = get_user(username)
+
+        u = User.objects.filter(username=username).first()
         if not u:
             errors.append("User doesnot exist")
 
@@ -208,7 +210,7 @@ class UpdateUserNameAndEmail(APIView):
 
         if request.user.userdetails.is_user_confirmed : 
             errors.append("User details are already locked.")    
-
+ 
         if user_exists(email):
             if email != request.user.email:
                 errors.append("Email already taken")

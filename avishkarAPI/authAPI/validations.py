@@ -69,15 +69,15 @@ def is_valid_number(text):
 
 
 def send_info_mail(user, subject, message):
-
-	email_from = settings.EMAIL_HOST_USER
+	return True
+	"""email_from = settings.EMAIL_HOST_USER
 	recipient_list = [user.email,]
 
 	msg = EmailMessage(subject=subject, body=message, from_email=email_from, to=recipient_list)
 	msg.content_subtype = "html"  # Main content is now text/html
 	res = msg.send()
 	
-	return res
+	return res"""
 
 
 
