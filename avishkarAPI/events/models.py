@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 
 class EventTeam(models.Model):
 
-    team_id = models.CharField(max_length=50, blank=False, null=False, default="")
+    team_id = models.CharField(max_length=50, blank=False, null=False, default="", unique=True)
     team_admin = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     team_name = models.CharField(max_length=256 ,blank=False, null=False, default="")
     team_members = models.ManyToManyField(User, related_name='members')
