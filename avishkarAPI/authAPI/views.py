@@ -135,8 +135,9 @@ class ResetPassword(APIView):
         errors = []
 
         u = get_user(username)
-
-        u = User.objects.filter(username=username).first()
+        if not u:
+            u = User.objects.filter(username=username).first()
+        
         if not u:
             errors.append("User doesnot exist")
 
